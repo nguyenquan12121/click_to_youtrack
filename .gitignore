@@ -1,0 +1,6 @@
+.venv
+GITHUB_TOKEN
+YOUTRACK_TOKEN
+test.json
+test_youtrack.html
+__pycache__
