@@ -9,20 +9,26 @@
     <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet" />
   </head>
   <body>
+    <!-- Top corner login button -->
+    <div class="top-right">
+      <form action="/youtrack-login" method="get">
+        <button type="submit" class="btn-youtrack">Log into YouTrack</button>
+      </form>
+    </div>
+
     <h1>CLICK TO YOUTRACK</h1>
-    <form action="" method="get" class="form-example">
+    {% if error and submitted %}
+    <div style="color: red">{{ error }}</div>
+    {% endif %}
+    <form action="/" method="post" class="form-example">
       <div class="form-example">
         <label for="github">Github Repository</label>
         <input type="text" name="github" id="github" required />
-      </div>
-      <div class="form-example">
-        <label for="youtrack">Youtrack Repository</label>
-        <input type="text" name="youtrack" id="youtrack" required />
-      </div>
-      <div class="form-example">
         <input type="submit" value="GitHub Search" class="btn github" />
-        <input type="submit" value="Youtrack" class="btn youtrack" />
       </div>
     </form>
+    {% if github %}
+    <h2>You entered: {{ github }}</h2>
+    {% endif %}
   </body>
 </html>

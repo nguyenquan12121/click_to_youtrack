@@ -1,7 +1,7 @@
 body {
   font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg, #2c3e50, #4ca1af);
-  color: #fff;
+  background-color: #2b2b2b; /* JetBrains dark background */
+  color: #a9b7c6; /* Light gray text color */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,7 +12,8 @@ body {
 
 h1 {
   margin-bottom: 24px;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+  color: #ffc66d; /* JetBrains header highlight */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .form-example {
@@ -27,16 +28,21 @@ input[type="text"] {
   width: 100%;
   padding: 14px 18px;
   font-size: 18px;
-  border-radius: 8px;
-  border: none;
+  border-radius: 4px;
+  border: 1px solid #555555; /* subtle border like JetBrains inputs */
+  background-color: #313335; /* JetBrains input background */
+  color: #a9b7c6; /* input text color */
   outline: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+input[type="text"]:focus {
+  border-color: #007aff; /* JetBrains focus highlight green */
 }
 
 .btn {
   padding: 12px 20px;
   font-size: 16px;
-  border-radius: 8px;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
   margin-right: 8px;
@@ -44,16 +50,46 @@ input[type="text"] {
 }
 
 .btn.github {
-  background: #24292e;
-  color: #fff;
+  background: #007aff; /* dark button */
+  color: #ffffff;
 }
 
 .btn.youtrack {
-  background: #0f7bff;
-  color: #fff;
+  background: #007aff; /* JetBrains accent blue */
+  color: #ffffff;
 }
 
 .btn:hover {
   transform: scale(1.05);
   opacity: 0.9;
+}
+
+.top-right {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.btn-youtrack {
+  background: #629755;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-youtrack:hover {
+  background: #629755;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-youtrack:active {
+  background: #629755;
+  box-shadow: 0 4px 3px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
 }
