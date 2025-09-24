@@ -1,5 +1,6 @@
 .venv
 .env
 test.json
+data.json
 test_youtrack.html
 __pycache__

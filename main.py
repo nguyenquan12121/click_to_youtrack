@@ -1,11 +1,12 @@
 from typing import Union
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+import json
 import os
 import requests
 import re
@@ -44,59 +45,37 @@ YOUTRACK_REPO_GET_FIELDS= "https://quan.youtrack.cloud/api/admin/projects?fields
 # }' 
 # -> needs more fields
 
-# Project
-# Priority
-# Type
-# State
-# Assignee
-# Subsystem
-# Fix versions
-# Affected versions
-# Fixed in build
-# Estimation
 
 def build_api_url_from_input(raw_url: str) -> str:
     """
+    Simple GitHub URL to API URL converter
     Accepts:
       - https://github.com/owner/repo
       - https://github.com/owner/repo/issues
       - https://github.com/owner/repo/issues/123
-      - https://api.github.com/repos/owner/repo/issues
-      - https://api.github.com/repos/owner/repo/issues/123?per_page=100
     Returns:
-      Canonical API URL:
-        https://api.github.com/repos/{owner}/{repo}/issues[/{num}]?per_page=100
+      - https://api.github.com/repos/owner/repo/issues?per_page=100
     """
-    parsed = urlparse(raw_url.strip())
-    host = parsed.netloc.lower()
-    path = parsed.path.strip("/")
-
-    # GitHub web URLs
-    if host in ("github.com", "www.github.com"):
-        parts = path.split("/")
-        if len(parts) >= 2:
-            owner, repo = parts[0], parts[1]
-
-            if len(parts) == 2:
-                # Just repo URL → issues list
-                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=100"
-
-            if len(parts) >= 3 and parts[2] == "issues":
-                if len(parts) == 3:
-                    return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=100"
-                elif len(parts) == 4:
-                    issue_num = parts[3]
-                    return f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_num}"
-
-    # GitHub API URLs (already in api.github.com)
-    if host == "api.github.com":
-        # passthrough but force per_page=100 if missing
-        base = raw_url.split("?", 1)[0]
-        qs = parse_qs(parsed.query)
-        qs["per_page"] = ["100"]
-        return base + "?" + urlencode({k: v[0] for k, v in qs.items()})
-
-    raise ValueError("Unsupported GitHub URL format.")
+    # Clean the input
+    url = raw_url.strip()
+    
+    # If it's already an API URL, return as-is
+    if "api.github.com" in url:
+        return url
+    
+    # Extract owner and repo from GitHub URL
+    if "github.com" in url:
+        # Remove protocol and domain, split by /
+        parts = url.replace("https://", "").replace("http://", "").split("/")
+        
+        # Find github.com position and get next two parts (owner and repo)
+        if "github.com" in parts:
+            idx = parts.index("github.com")
+            if len(parts) > idx + 2:
+                owner = parts[idx + 1]
+                repo = parts[idx + 2]
+                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=1"
+    return "-1"
 
 
 
@@ -113,6 +92,7 @@ def youtrack_req():
     response = requests.get(url=request["url"], headers=request["headers"])
     data = response.json()
     return data
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -150,6 +130,8 @@ async def handle_form(request: Request, github: str = Form(...)):
         }
         response = requests.get(url=request1["url"], headers=request1["headers"])
         data = response.json()
+        with open("data.json", "w") as file:
+            json.dump(data, file, indent=4, ensure_ascii=False)
         print("ASLKDJALSKDLKSDKSJLSKDJL")
         return templates.TemplateResponse("index.html", {"request": request, "github": github, "submitted": True})
 
