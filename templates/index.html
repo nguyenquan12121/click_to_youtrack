@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>YouTrack Connector</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet" />
+  </head>
+  <body>
+    <h1>CLICK TO YOUTRACK</h1>
+    <form action="" method="get" class="form-example">
+      <div class="form-example">
+        <label for="github">Github Repository</label>
+        <input type="text" name="github" id="github" required />
+      </div>
+      <div class="form-example">
+        <label for="youtrack">Youtrack Repository</label>
+        <input type="text" name="youtrack" id="youtrack" required />
+      </div>
+      <div class="form-example">
+        <input type="submit" value="GitHub Search" class="btn github" />
+        <input type="submit" value="Youtrack" class="btn youtrack" />
+      </div>
+    </form>
+  </body>
+</html>
