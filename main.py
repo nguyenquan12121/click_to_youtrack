@@ -80,7 +80,7 @@ def build_api_url_from_input(raw_url: str) -> str:
                 owner = parts[idx + 1]
                 repo = parts[idx + 2]
                 return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=100"
-    return "-1"
+    return ""
 
 
 
@@ -114,7 +114,7 @@ def index():
             r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
         )
 
-        if not github:
+        if len(github) < 1:
             error = "URL cannot be empty."
             submitted = True
         elif not GITHUB_REPO_REGEX.match(github):

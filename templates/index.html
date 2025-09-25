@@ -17,10 +17,6 @@
     </div>
     <h1>CLICK TO YOUTRACK</h1>
 
-    {% if error and submitted %}
-    <div style="color: red">{{ error }}</div>
-    {% endif %}
-
     <form action="/" method="post" class="form-example">
       <div class="form-example">
         <label for="github">Github Repository</label>
@@ -34,8 +30,9 @@
         <input type="submit" value="GitHub Search" class="btn github" />
       </div>
     </form>
-
-    {% if github %}
+    {% if github and error and submitted %}
+    <div style="color: red">{{ error }}</div>
+    {% endif %} {% if github %}
     <h2>You entered: {{ github }}</h2>
     {% endif %} {% if issues %}
     <div class="issues-container">
@@ -79,7 +76,8 @@
         {% endfor %}
       </div>
     </div>
-    {% elif submitted and issues is defined and issues|length == 0 %}
+    {% elif not error and submitted and issues is defined and issues|length == 0
+    %}
     <div class="no-issues">
       <p>No issues found in this repository.</p>
     </div>
