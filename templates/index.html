@@ -40,7 +40,7 @@
     {% endif %} {% if issues %}
     <div class="issues-container">
       <div class="issues-header">
-        <input type="checkbox" class="check-all" />
+        <input type="checkbox" id="check-all" />
         <p>CHECK ALL</p>
         <h2>GitHub Issues ({{ issues|length }} found)</h2>
       </div>
@@ -85,4 +85,5 @@
     </div>
     {% endif %}
   </body>
+  <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
 </html>
