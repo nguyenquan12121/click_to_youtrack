@@ -93,3 +93,164 @@ input[type="text"]:focus {
   box-shadow: 0 4px 3px rgba(0, 0, 0, 0.2);
   transform: translateY(1px);
 }
+
+/* GitHub Issues Display Styles */
+.issues-container {
+  background-color: #ff0000; /* JetBrains panel background */
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 900px;
+  padding: 25px;
+  margin: 20px auto;
+  border: 1px solid #3c3f41; /* JetBrains border color */
+}
+
+.issues-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #ffc66d; /* JetBrains header highlight */
+  border-bottom: 2px solid #555555;
+  padding-bottom: 10px;
+  /* Header stays fixed, doesn't scroll */
+  flex-shrink: 0;
+}
+
+.issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Make issues list scrollable */
+  overflow-y: auto;
+  flex-grow: 1;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #555555 #2b2b2b;
+  padding-right: 5px; /* Add space for scrollbar */
+  max-height: 70vh; /* 70% of viewport height */
+  display: flex;
+  flex-direction: column;
+}
+
+.issue-card {
+  background-color: #2b2b2b; /* Slightly darker than container */
+  border-radius: 6px;
+  padding: 18px;
+  border-left: 4px solid #007aff; /* JetBrains accent blue */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.issue-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  background-color: #2e2e2e;
+}
+
+.issue-title {
+  margin-bottom: 10px;
+}
+
+.issue-title a {
+  color: #6897bb; /* JetBrains link blue */
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.issue-title a:hover {
+  color: #ffc66d; /* JetBrains highlight yellow */
+  text-decoration: underline;
+}
+
+.issue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.issue-state {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.issue-state.open {
+  background-color: #629755; /* JetBrains green */
+  color: white;
+}
+
+.issue-state.closed {
+  background-color: #cc7832; /* JetBrains orange/brown */
+  color: white;
+}
+
+.issue-author,
+.issue-date {
+  color: #808080;
+}
+
+.issue-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.label {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.issue-body {
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: #a9b7c6;
+  font-size: 14px;
+}
+
+.btn-import {
+  background-color: #629755; /* JetBrains green */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.btn-import:hover {
+  background-color: #507944;
+}
+
+.no-issues {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #808080;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .issues-container {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .issue-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-example {
+    width: 95%;
+  }
+}

@@ -1,16 +1,12 @@
-from typing import Union
 from urllib.parse import parse_qs, urlencode, urlparse
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from flask import Flask, Response, request, render_template,redirect,  jsonify
+from flask_cors import CORS
 
 import json
 import os
 import requests
 import re
-app = FastAPI()
 
 GITHUB_REPO = "https://github.com/strawberrymusicplayer/strawberry/"
 load_dotenv()
@@ -20,7 +16,7 @@ YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
 YOUTRACK_REPO = "https://quan.youtrack.cloud/api/admin/projects?fields=id,name,shortName"
 YOUTRACK_REPO_GET_FIELDS= "https://quan.youtrack.cloud/api/admin/projects?fields=assignee"
 
-def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_label, issue_state):
+def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_state):
     body = {
         "project": {
             "name": project_name,
@@ -40,7 +36,7 @@ def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_labe
         },
         {
         "value": {
-        "name": issue_label,
+        "name": "Bug",
         "$type": "EnumBundleElement"
         },
         "name": "Type",
@@ -83,7 +79,7 @@ def build_api_url_from_input(raw_url: str) -> str:
             if len(parts) > idx + 2:
                 owner = parts[idx + 1]
                 repo = parts[idx + 2]
-                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=1"
+                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=100"
     return "-1"
 
 
@@ -102,45 +98,51 @@ def youtrack_req():
     data = response.json()
     return data
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app = Flask(__name__)
+CORS(app)
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "github": None, "submitted": False, "error": False})
-
-
-@app.post("/", response_class=HTMLResponse)
-async def handle_form(request: Request, github: str = Form(...)):
-    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-    github = github.strip()
-    GITHUB_REPO_REGEX = re.compile(
-        r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
-    )
-
-    if not github:
-        error_msg = "URL cannot be empty."
-        return templates.TemplateResponse(
-            "index.html", {"request": request, "error": error_msg, "github": None, "submitted": True}
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    error = None
+    issues = None
+    github = ""
+    submitted = False
+    if request.method == "POST":
+        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+        github = request.form.get('github', '').strip()
+        GITHUB_REPO_REGEX = re.compile(
+            r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
         )
 
-    elif not GITHUB_REPO_REGEX.match(github):
-        error_msg = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
-        return templates.TemplateResponse(
-            "index.html", {"request": request, "error": error_msg, "github": None, "submitted": True}
-        )       
-    else:
-        github_issue_api = build_api_url_from_input(github)
-        request1 = {    "url": github_issue_api, 
-                   "headers": {
-            "header": "Accept: application/vnd.github+json" ,
-            "header": f'Authorization:{GITHUB_TOKEN}' 
-                   }
-        }
-        response = requests.get(url=request1["url"], headers=request1["headers"])
-        data = response.json()
-        with open("data.json", "w") as file:
-            json.dump(data, file, indent=4, ensure_ascii=False)
-        return templates.TemplateResponse("index.html", {"request": request, "github": github, "submitted": True})
-
-
+        if not github:
+            error = "URL cannot be empty."
+            submitted = True
+        elif not GITHUB_REPO_REGEX.match(github):
+            error = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
+            submitted = True     
+        else:
+            github_issue_api = build_api_url_from_input(github)
+            request1 = {    "url": github_issue_api, 
+                    "headers": {
+                "header": "Accept: application/vnd.github+json" ,
+                "header": f'Authorization:{GITHUB_TOKEN}' 
+                    }
+            }
+            response = requests.get(url=request1["url"], headers=request1["headers"])
+            if response.status_code == 200:
+                issues = response.json()
+                submitted = True   
+            else:
+                    issues =  []
+                    error=  f"Error fetching issues: {response.status_code}" , 
+                    submitted =  True      
+    return render_template(
+    'index.html',
+    github=github,
+    issues=issues,
+    error=error,
+    submitted=submitted
+    )
+    
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

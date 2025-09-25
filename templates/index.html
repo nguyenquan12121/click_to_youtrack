@@ -6,7 +6,7 @@
     <title>YouTrack Connector</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="./static/styles.css" />
   </head>
   <body>
     <!-- Top corner login button -->
@@ -16,18 +16,71 @@
       </form>
     </div>
     <h1>CLICK TO YOUTRACK</h1>
+
     {% if error and submitted %}
     <div style="color: red">{{ error }}</div>
     {% endif %}
+
     <form action="/" method="post" class="form-example">
       <div class="form-example">
         <label for="github">Github Repository</label>
-        <input type="text" name="github" id="github" required />
+        <input
+          type="text"
+          name="github"
+          id="github"
+          value="{{ github or '' }}"
+          required
+        />
         <input type="submit" value="GitHub Search" class="btn github" />
       </div>
     </form>
+
     {% if github %}
     <h2>You entered: {{ github }}</h2>
+    {% endif %} {% if issues %}
+    <div class="issues-container">
+      <h2>GitHub Issues ({{ issues|length }} found)</h2>
+      <div class="issues-list">
+        {% for issue in issues %}
+        <div class="issue-card">
+          <h3 class="issue-title">
+            <a href="{{ issue.html_url }}" target="_blank">
+              #{{ issue.number }}: {{ issue.title }}
+            </a>
+          </h3>
+          <div class="issue-meta">
+            <span class="issue-state {{ issue.state }}">{{ issue.state }}</span>
+            <span class="issue-author">By: {{ issue.user.login }}</span>
+            <span class="issue-date">Created: {{ issue.created_at }}</span>
+            {% if issue.labels %}
+            <div class="issue-labels">
+              {% for label in issue.labels %}
+              <span
+                class="label"
+                style="background-color: #{{ label.color }}; color: white; padding: 2px 6px; border-radius: 3px; margin: 2px; font-size: 12px;"
+              >
+                {{ label.name }}
+              </span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          <p class="issue-body">
+            {% if issue.body and issue.body|length > 200 %} {{ issue.body[:200]
+            }}... {% else %} {{ issue.body or 'No description provided.' }} {%
+            endif %}
+          </p>
+          <button class="btn-import" onclick="importIssue({{ issue.number }})">
+            Import to YouTrack
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% elif submitted and issues is defined and issues|length == 0 %}
+    <div class="no-issues">
+      <p>No issues found in this repository.</p>
+    </div>
     {% endif %}
   </body>
 </html>
