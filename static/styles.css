@@ -96,7 +96,7 @@ input[type="text"]:focus {
 
 /* GitHub Issues Display Styles */
 .issues-container {
-  background-color: #ff0000; /* JetBrains panel background */
+  background-color: #333333; /* JetBrains panel background */
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   width: 90%;
@@ -113,31 +113,48 @@ input[type="text"]:focus {
   color: #ffc66d; /* JetBrains header highlight */
   border-bottom: 2px solid #555555;
   padding-bottom: 10px;
-  /* Header stays fixed, doesn't scroll */
   flex-shrink: 0;
 }
 
+.issues-header {
+  display: flex;
+  align-items: center;
+}
+.check-all {
+  height: 25px;
+  width: 25px;
+  margin-right: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.issue-item {
+  display: flex;
+  align-items: center;
+}
+
+.check-individual {
+  height: 25px;
+  width: 25px;
+  margin-right: 10px;
+  align-items: center;
+  justify-content: center;
+}
 .issues-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  /* Make issues list scrollable */
   overflow-y: auto;
   flex-grow: 1;
-  /* Custom scrollbar styling */
-  scrollbar-width: thin;
-  scrollbar-color: #555555 #2b2b2b;
-  padding-right: 5px; /* Add space for scrollbar */
-  max-height: 70vh; /* 70% of viewport height */
+  padding-right: 5px;
   display: flex;
   flex-direction: column;
 }
 
 .issue-card {
-  background-color: #2b2b2b; /* Slightly darker than container */
+  background-color: #2b2b2b;
   border-radius: 6px;
   padding: 18px;
-  border-left: 4px solid #007aff; /* JetBrains accent blue */
+  flex: 1;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -152,14 +169,14 @@ input[type="text"]:focus {
 }
 
 .issue-title a {
-  color: #6897bb; /* JetBrains link blue */
+  color: #6897bb;
   text-decoration: none;
   font-size: 18px;
   transition: color 0.2s ease;
 }
 
 .issue-title a:hover {
-  color: #ffc66d; /* JetBrains highlight yellow */
+  color: #ffc66d;
   text-decoration: underline;
 }
 
@@ -180,12 +197,12 @@ input[type="text"]:focus {
 }
 
 .issue-state.open {
-  background-color: #629755; /* JetBrains green */
+  background-color: #629755;
   color: white;
 }
 
 .issue-state.closed {
-  background-color: #cc7832; /* JetBrains orange/brown */
+  background-color: #cc7832;
   color: white;
 }
 
@@ -215,7 +232,7 @@ input[type="text"]:focus {
 }
 
 .btn-import {
-  background-color: #629755; /* JetBrains green */
+  background-color: #629755;
   color: white;
   border: none;
   padding: 8px 16px;
