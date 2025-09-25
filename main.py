@@ -14,38 +14,49 @@ app = FastAPI()
 
 GITHUB_REPO = "https://github.com/strawberrymusicplayer/strawberry/"
 load_dotenv()
-# could just copy the link i guess
 GITHUB_ISSUE = "https://api.github.com/repos/strawberrymusicplayer/strawberry/issues?per_page=100"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
-# needs a link or something
-# YOUTRACK_REPO = "https://quan.youtrack.cloud/api/users/me"
 YOUTRACK_REPO = "https://quan.youtrack.cloud/api/admin/projects?fields=id,name,shortName"
 YOUTRACK_REPO_GET_FIELDS= "https://quan.youtrack.cloud/api/admin/projects?fields=assignee"
 
-#curl -X GET \
-#'https://quan.youtrack.cloud/api/users/me' \                                                                            -H 'Authorization: Bearer perm-YWRtaW4=.NDQtMQ==.bEVtcOJ9b8462q7wtiRukDPu7bIasd' \
-#-H 'Accept: application/json' \
-#-H 'Cache-Control: no-cache' \
-#-H 'Content-Type: application/json'            
-
-# curl -X GET 'https://example.youtrack.cloud/api/issues?query=in:SP&fields=id,idReadable,summary,customFields(id,projectCustomField(field(name)))' \
-# -H 'Accept: application/json' \
-# -H 'Authorization: Bearer perm:amFuZS5kb2U=.UkVTVCBBUEk=.wcKuAok8cHmAtzjA6xlc4BrB4hleaX'
-
-# curl -X POST \
-# https://quan.youtrack.cloud/api/issues \
-# -H 'Accept: application/json' \
-# -H 'Authorization: Bearer perm-YWRtaW4=.NDQtMQ==.bEVtcOJ9b8462q7wtiRukDPu7bIasd' \
-# -H 'Content-Type: application/json' \
-# -d '{
-# "project":{ "name": "Sample Project","id": "0-0","$type": "Project"},
-# "summary":"REST API lets you create issues!",
-# "description":"Let'\''s create a new issue using YouTrack'\''s REST API."
-# }' 
-# -> needs more fields
-
-
+def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_label, issue_state):
+    body = {
+        "project": {
+            "name": project_name,
+            "id": "0-0", 
+            "$type": "Project"
+        },
+        "summary": issue_title, 
+        "description": issue_body,
+        "customFields": [
+    {
+      "value": {
+        "name": "Normal",
+        "$type": "EnumBundleElement",
+        },
+        "name": "Priority",
+        "$type": "SingleEnumIssueCustomField"
+        },
+        {
+        "value": {
+        "name": issue_label,
+        "$type": "EnumBundleElement"
+        },
+        "name": "Type",
+        "$type": "SingleEnumIssueCustomField"
+        },
+        {
+        "value": {
+        "name": issue_state,
+        "$type": "StateBundleElement"
+        },
+        "name": "State",
+        "$type": "StateIssueCustomField"
+        }
+        ]
+        
+    }
 def build_api_url_from_input(raw_url: str) -> str:
     """
     Simple GitHub URL to API URL converter
@@ -58,8 +69,6 @@ def build_api_url_from_input(raw_url: str) -> str:
     """
     # Clean the input
     url = raw_url.strip()
-    
-    # If it's already an API URL, return as-is
     if "api.github.com" in url:
         return url
     
@@ -132,7 +141,6 @@ async def handle_form(request: Request, github: str = Form(...)):
         data = response.json()
         with open("data.json", "w") as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
-        print("ASLKDJALSKDLKSDKSJLSKDJL")
         return templates.TemplateResponse("index.html", {"request": request, "github": github, "submitted": True})
 
 
