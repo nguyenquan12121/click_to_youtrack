@@ -1,11 +1,6 @@
 from pathlib import Path
-import uuid
 
 import json
-import os
-import requests
-import re
-import time
 
 # mapping GH issue number -> YouTrack id
 MAPPINGS_PATH = Path("mappings.json")
