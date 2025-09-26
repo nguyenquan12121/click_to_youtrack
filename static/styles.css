@@ -271,10 +271,9 @@ input[type="text"]:focus {
   }
 }
 
-/* Imported issue styling */
 .issue-item.imported {
-  background-color: #f0fff0; /* Light green background */
-  border-left: 4px solid #28a745; /* Green border */
+  background-color: #343a40;
+  border-left: 4px solid #28a745;
   opacity: 0.8;
 }
 
@@ -303,13 +302,11 @@ input[type="text"]:focus {
   background-color: #6c757d !important;
 }
 
-/* Disable checkboxes for imported issues */
 .issue-item.imported input[type="checkbox"] {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-/* Regular issue card styling for contrast */
 .issue-item:not(.imported) {
   background-color: #333333;
 }
