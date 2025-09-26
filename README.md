@@ -7,10 +7,14 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 ## Quickstart
 
 - Clone the repo
-- **Windows**  
-  Run `.\start.bat`
-- **Linux,MacOS**
-  Run `./start.sh`, make sure to `chmod` first
+
+### Windows
+
+- Run `.\start.bat`
+
+### Linux,MacOS
+
+- Run `./start.sh`, make sure to `chmod` first
 
 ## Usage
 
