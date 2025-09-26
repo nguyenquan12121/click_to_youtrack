@@ -4,7 +4,6 @@ import uuid
 from dotenv import load_dotenv
 from flask import Flask, Response, request, render_template, redirect, jsonify, url_for, session
 from flask_cors import CORS
-from youtrack_client import YouTrackClient
 from dateutil import parser
 
 import json
