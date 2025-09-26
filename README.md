@@ -30,14 +30,13 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 ## Development
 
 ### Windows:
-
 - `python -m venv .venv`
 - `.\.venv\Scripts\Activate.ps1`
 
 ### macOS/Linux:
-
 - `python3 -m venv .venv`
 - `source .venv/bin/activate`
+
 
 - Install dependencies: `pip install -r requirements.txt`
 
