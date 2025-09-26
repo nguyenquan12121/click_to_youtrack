@@ -9,7 +9,6 @@ import requests
 import re
 load_dotenv()
 
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 # --- Flask app and secret key (required for session) ---
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(24)
@@ -47,8 +46,6 @@ def github_page():
     mappings = load_mappings()
     
     if request.method == 'POST':
-        # refresh local GITHUB_TOKEN from env (if changed)
-        GITHUB_TOKEN_LOCAL = os.getenv("GITHUB_TOKEN", GITHUB_TOKEN)
         github = request.form.get('github', '').strip()
         GITHUB_REPO_REGEX = re.compile(
             r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
@@ -65,9 +62,6 @@ def github_page():
             headers = {
                 "Accept": "application/vnd.github+json"
             }
-            # attach token if present
-            if GITHUB_TOKEN_LOCAL:
-                headers["Authorization"] = f"token {GITHUB_TOKEN_LOCAL}"
                 
             response = requests.get(url=github_issue_api, headers=headers)
             if response.status_code == 200:
