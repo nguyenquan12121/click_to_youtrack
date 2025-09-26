@@ -397,7 +397,18 @@ def build_api_url_from_input(raw_url: str) -> str:
                 return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=5"
     return ""
 
-
+# YOUTRACK_DOMAINS = {
+#     'cloud': {
+#         'base_url': 'https://{tenant}.youtrack.cloud/api',
+#         'auth_url': 'https://{tenant}.youtrack.cloud/hub/api/rest/oauth2/auth',
+#         'token_url': 'https://{tenant}.youtrack.cloud/hub/api/rest/oauth2/token',
+#     },
+#     'selfhosted': {
+#         'base_url': 'https://{domain}/api',
+#         'auth_url': 'https://{domain}/hub/api/rest/oauth2/auth',
+#         'token_url': 'https://{domain}/hub/api/rest/oauth2/token',
+#     }
+# }
 def import_one_issue_to_youtrack(youtrack_url, permanent_token, project_name, github_issue):
     youtrack_issue = convert_github_to_youtrack(
         project_name=project_name,
