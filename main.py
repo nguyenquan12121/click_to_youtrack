@@ -2,7 +2,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 from dotenv import load_dotenv
 from flask import Flask, Response, request, render_template,redirect,  jsonify
 from flask_cors import CORS
-
+from youtrack_client import YouTrackClient
 import json
 import os
 import requests
@@ -101,7 +101,7 @@ def youtrack_req():
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/connect_to_github', methods=['GET', 'POST'])
 def index():
     error = None
     issues = None
@@ -137,12 +137,33 @@ def index():
                     error=  f"Error fetching issues: {response.status_code}" , 
                     submitted =  True      
     return render_template(
-    'index.html',
+    'github.html',
     github=github,
     issues=issues,
     error=error,
     submitted=submitted
     )
-    
+
+@app.route('/', methods=['GET', 'POST'])
+def setup_youtrack():
+    if request.method == 'POST':
+        youtrack_url = request.form.get('youtrack_url', '').strip()
+        permanent_token = request.form.get('permanent_token', '').strip()
+        
+        # Validate inputs
+        if not youtrack_url or not permanent_token:
+            return render_template('youtrack.html', 
+                                error='Please fill in all fields')
+        
+        if not youtrack_url.startswith('https://'):
+            return render_template('youtrack.html',
+                                error='URL must start with https://')
+        
+        if not permanent_token.startswith('perm:'):
+            return render_template('youtrack.html',
+                                error='Token must start with "perm:"')
+        
+    return render_template('youtrack.html')
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -1,0 +1,40 @@
+<div class="setup-container">
+  <h2>Connect to YouTrack</h2>
+
+  <form action="/" method="post">
+    <div class="form-group">
+      <label for="youtrack_url">YouTrack Instance URL:</label>
+      <input
+        type="url"
+        id="youtrack_url"
+        name="youtrack_url"
+        placeholder="https://your-tenant.youtrack.cloud"
+        pattern="https://.*"
+        required
+      />
+      <small>Your YouTrack cloud instance or self-hosted URL</small>
+    </div>
+
+    <div class="form-group">
+      <label for="permanent_token">Permanent Token:</label>
+      <input
+        type="password"
+        id="permanent_token"
+        name="permanent_token"
+        placeholder="perm:xxxxxxxxxxxxxxxx"
+        required
+      />
+      <small>
+        <a
+          href="https://www.jetbrains.com/help/youtrack/devportal/Manage-Permanent-Token.html"
+          target="_blank"
+          >How to create a permanent token</a
+        >
+      </small>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn-primary">Save Configuration</button>
+    </div>
+  </form>
+</div>
