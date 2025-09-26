@@ -100,46 +100,60 @@ def youtrack_req():
 
 app = Flask(__name__)
 CORS(app)
-
-@app.route('/github', methods=['GET', 'POST'])
-def github_page():
+@app.route('/github', methods=['GET'])
+def get_github_page():
     global session
     youtrack_url =session['youtrack_url']
     permanent_token = session['permanent_token'] 
-    config_status=  session['youtrack_configured']    
+    error = None
+    issues = None
+    github = ""
+    submitted = False   
+    return render_template(
+    'github.html',
+    youtrack_url = youtrack_url, 
+    permanent_token = permanent_token,
+    github=github,
+    issues=issues,
+    error=error,
+    submitted=submitted
+    )
+@app.route('/github', methods=['POST'])
+def github_page():
+    global session
+    youtrack_url =session['youtrack_url']
+    permanent_token = session['permanent_token']  
     error = None
     issues = None
     github = ""
     submitted = False
-    if request.method == "POST":
-        GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-        github = request.form.get('github', '').strip()
-        GITHUB_REPO_REGEX = re.compile(
-            r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
-        )
-
-        if len(github) < 1:
-            error = "URL cannot be empty."
-            submitted = True
-        elif not GITHUB_REPO_REGEX.match(github):
-            error = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
-            submitted = True     
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+    github = request.form.get('github', '').strip()
+    GITHUB_REPO_REGEX = re.compile(
+        r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
+    )
+    if len(github) < 1:
+        error = "URL cannot be empty."
+        submitted = True
+    elif not GITHUB_REPO_REGEX.match(github):
+        error = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
+        submitted = True     
+    else:
+        github_issue_api = build_api_url_from_input(github)
+        request1 = {    "url": github_issue_api, 
+                "headers": {
+            "header": "Accept: application/vnd.github+json" ,
+            "header": f'Authorization:{GITHUB_TOKEN}' 
+                }
+        }
+        response = requests.get(url=request1["url"], headers=request1["headers"])
+        if response.status_code == 200:
+            issues = response.json()
+            submitted = True   
         else:
-            github_issue_api = build_api_url_from_input(github)
-            request1 = {    "url": github_issue_api, 
-                    "headers": {
-                "header": "Accept: application/vnd.github+json" ,
-                "header": f'Authorization:{GITHUB_TOKEN}' 
-                    }
-            }
-            response = requests.get(url=request1["url"], headers=request1["headers"])
-            if response.status_code == 200:
-                issues = response.json()
-                submitted = True   
-            else:
-                    issues =  []
-                    error=  f"Error fetching issues: {response.status_code}" , 
-                    submitted =  True      
+                issues =  []
+                error=  f"Error fetching issues: {response.status_code}" , 
+                submitted =  True      
     return render_template(
     'github.html',
     youtrack_url = youtrack_url, 
@@ -174,9 +188,7 @@ def input_youtrack():
     session['youtrack_url'] = youtrack_url
     session['permanent_token'] = permanent_token
     session['youtrack_configured'] = True
-    return redirect(url_for('github_page'))
-
-
+    return redirect(url_for('get_github_page'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

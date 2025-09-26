@@ -44,9 +44,8 @@
         <a href="/" class="btn-change">Change Configuration</a>
       </div>
     </div>
-    <h1>CLICK TO YOUTRACK</h1>
 
-    <form action="/connect_to_github" method="post" class="form-example">
+    <form action="/github" method="post" class="form-example">
       <div class="form-example">
         <label for="github">Github Repository</label>
         <input
@@ -59,6 +58,7 @@
         <input type="submit" value="GitHub Search" class="btn github" />
       </div>
     </form>
+
     {% if github and error and submitted %}
     <div style="color: red">{{ error }}</div>
     {% endif %} {% if github %}
@@ -67,13 +67,30 @@
     <div class="issues-container">
       <div class="issues-header">
         <input type="checkbox" id="check-all" />
-        <p>CHECK ALL</p>
+        <label for="check-all">CHECK ALL</label>
+        <div class="counter-display">
+          <span id="checked-counter">0</span> / {{ issues|length }} issues
+          selected
+        </div>
         <h2>GitHub Issues ({{ issues|length }} found)</h2>
+        <button
+          type="button"
+          id="import-selected"
+          class="btn-import-bulk"
+          disabled
+        >
+          Import Selected (<span id="import-count">0</span>)
+        </button>
       </div>
       <div class="issues-list">
         {% for issue in issues %}
         <div class="issue-item">
-          <input type="checkbox" class="check-individual" />
+          <input
+            type="checkbox"
+            class="check-individual"
+            data-issue-id="{{ issue.number }}"
+            data-issue-title="{{ issue.title|e }}"
+          />
 
           <div class="issue-card">
             <h3 class="issue-title">
@@ -100,6 +117,12 @@
               </div>
               {% endif %}
             </div>
+            <button
+              class="btn-import"
+              onclick="importSingleIssue({{ issue.number }}, '{{ issue.title|e }}')"
+            >
+              Import This Issue
+            </button>
           </div>
         </div>
         {% endfor %}
