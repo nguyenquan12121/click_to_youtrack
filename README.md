@@ -12,9 +12,10 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 
 - Run `.\start.bat`
 
-### Linux,MacOS
+### Linux, macOS
 
-- Run `./start.sh`, make sure to `chmod` first
+- Run `chmod +x start.sh`
+- Run `./start.sh`
 
 ## Usage
 
@@ -33,7 +34,7 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 - `python -m venv .venv`
 - `.\.venv\Scripts\Activate.ps1`
 
-### MacOS/Linux:
+### macOS/Linux:
 
 - `python3 -m venv .venv`
 - `source .venv/bin/activate`
@@ -44,19 +45,19 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 
 ## Showcase
 
-- Authenticating with youtrack
+- Authenticating with YouTrack
   ![alt text](screenshots/1.png)
-- Successfull github repository search
+- Successful GitHub repository search
   ![alt text](screenshots/2.png)
-- Selecting 3 issues then importing them leads to this prompt
+- Selecting 3 issues and importing them leads to this prompt
   ![alt text](screenshots/3.png)
-- Successfull issue import
+- Successful issue import
   ![alt text](screenshots/4.png)
-- Logging into Youtrack, the 3 issues have been imported (newly starred ones)
+- Logging into YouTrack, the 3 issues have been imported (newly starred ones)
   ![alt text](screenshots/5.png)
-- Title, Description, Status, State have been imported
+- Title, description, status and state have been imported
   ![alt text](screenshots/6.png)
 - Imported issues are colored green
   ![alt text](screenshots/7.png)
-- Use `Check Sync Status` to see if the issues are updated on github. Use `Sync All Mapped Issues` push new issues to Youtrack
+- Use `Check Sync Status` to see if the issues are updated on GitHub. Use `Sync All Mapped Issues` to push new issues to Youtrack
   ![alt text](screenshots/8.png)
