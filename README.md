@@ -37,3 +37,22 @@ This project allows you to fetch **open issues from a GitHub repository** and im
 - Install dependencies: `pip install -r requirements.txt`
 
 - Start the server: `python src/app.py`
+
+## Showcase
+
+- Authenticating with youtrack
+  ![alt text](screenshots/1.png)
+- Successfull github repository search
+  ![alt text](screenshots/2.png)
+- Selecting 3 issues then importing them leads to this prompt
+  ![alt text](screenshots/3.png)
+- Successfull issue import
+  ![alt text](screenshots/4.png)
+- Logging into Youtrack, the 3 issues have been imported (newly starred ones)
+  ![alt text](screenshots/5.png)
+- Title, Description, Status, State have been imported
+  ![alt text](screenshots/6.png)
+- Imported issues are colored green
+  ![alt text](screenshots/7.png)
+- Use `Check Sync Status` to see if the issues are updated on github. Use `Sync All Mapped Issues` push new issues to Youtrack
+  ![alt text](screenshots/8.png)
