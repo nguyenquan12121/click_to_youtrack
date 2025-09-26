@@ -3,10 +3,13 @@ from dotenv import load_dotenv
 from flask import Flask, Response, request, render_template,redirect,  jsonify, url_for
 from flask_cors import CORS
 from youtrack_client import YouTrackClient
+
 import json
 import os
 import requests
 import re
+import time
+
 session = {}
 GITHUB_REPO = "https://github.com/strawberrymusicplayer/strawberry/"
 load_dotenv()
@@ -16,7 +19,7 @@ YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
 YOUTRACK_REPO = "https://quan.youtrack.cloud/api/admin/projects?fields=id,name,shortName"
 YOUTRACK_REPO_GET_FIELDS= "https://quan.youtrack.cloud/api/admin/projects?fields=assignee"
 
-def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_state):
+def convert_github_to_youtrack(project_name, issue_title, issue_body, issue_state):
     body = {
         "project": {
             "name": project_name,
@@ -24,35 +27,35 @@ def convert_github_to_youtrack(project_name,issue_title, issue_body , issue_stat
             "$type": "Project"
         },
         "summary": issue_title, 
-        "description": issue_body,
+        "description": issue_body or "No description provided",
         "customFields": [
-    {
-      "value": {
-        "name": "Normal",
-        "$type": "EnumBundleElement",
-        },
-        "name": "Priority",
-        "$type": "SingleEnumIssueCustomField"
-        },
-        {
-        "value": {
-        "name": "Bug",
-        "$type": "EnumBundleElement"
-        },
-        "name": "Type",
-        "$type": "SingleEnumIssueCustomField"
-        },
-        {
-        "value": {
-        "name": issue_state,
-        "$type": "StateBundleElement"
-        },
-        "name": "State",
-        "$type": "StateIssueCustomField"
-        }
+            {
+                "value": {
+                    "name": "Normal",
+                    "$type": "EnumBundleElement"
+                },
+                "name": "Priority",
+                "$type": "SingleEnumIssueCustomField"
+            },
+            {
+                "value": {
+                    "name": "Bug",
+                    "$type": "EnumBundleElement"
+                },
+                "name": "Type",
+                "$type": "SingleEnumIssueCustomField"
+            },
+            {
+                "value": {
+                    "name": issue_state.capitalize() if issue_state else "Open",
+                    "$type": "StateBundleElement"
+                },
+                "name": "State",
+                "$type": "StateIssueCustomField"
+            }
         ]
-        
     }
+    return body
 def build_api_url_from_input(raw_url: str) -> str:
     """
     Simple GitHub URL to API URL converter
@@ -82,8 +85,54 @@ def build_api_url_from_input(raw_url: str) -> str:
                 return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=100"
     return ""
 
-
-
+def import_one_issue_to_youtrack(youtrack_url, permanent_token, project_name, github_issue):
+    youtrack_issue = convert_github_to_youtrack(
+        project_name=project_name,
+        issue_title=github_issue['title'],
+        issue_body=github_issue['body'],
+        issue_state=github_issue['state']
+    )
+    url = f"{youtrack_url.rstrip('/')}/issues"
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {permanent_token}',
+        'Content-Type': 'application/json'
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=youtrack_issue)
+        
+        if response.status_code == 200:
+            return {
+                'success': True,
+                'issue_id': github_issue['number'],
+                'youtrack_id': response.json().get('id'),
+                'message': f"Issue #{github_issue['number']} imported successfully"
+            }
+        else:
+            return {
+                'success': False,
+                'issue_id': github_issue['number'],
+                'error': f"YouTrack API error: {response.status_code} - {response.text}",
+                'message': f"Failed to import issue #{github_issue['number']}"
+            }
+            
+    except Exception as e:
+        return {
+            'success': False,
+            'issue_id': github_issue['number'],
+            'error': str(e),
+            'message': f"Error importing issue #{github_issue['number']}"
+        }
+def import_bulk_issues_to_youtrack(youtrack_url, permanent_token, project_name, github_issues):
+    results = []
+    
+    for issue in github_issues:
+        result = import_one_issue_to_youtrack(youtrack_url, permanent_token, project_name, issue)
+        results.append(result)
+        time.sleep(0.5)
+    
+    return results
 def youtrack_req():
     global YOUTRACK_TOKEN, YOUTRACK_REPO_GET_FIELDS
     request = {    "url": YOUTRACK_REPO_GET_FIELDS, 
