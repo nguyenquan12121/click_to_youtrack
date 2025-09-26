@@ -9,6 +9,40 @@
     <link rel="stylesheet" href="./static/styles.css" />
   </head>
   <body>
+    <!-- YouTrack Configuration Display Section -->
+    <div class="youtrack-config-display">
+      <h2>Current YouTrack Configuration</h2>
+      <div class="config-fields">
+        <div class="config-field">
+          <label>YouTrack URL:</label>
+          <input
+            type="text"
+            value="{{ youtrack_url }}"
+            readonly
+            class="config-input"
+          />
+        </div>
+        <div class="config-field">
+          <label>Permanent Token:</label>
+          <input
+            type="password"
+            value="{{ permanent_token }}"
+            readonly
+            class="config-input"
+            id="token-display"
+          />
+          <button
+            type="button"
+            onclick="toggleTokenVisibility()"
+            class="btn-toggle"
+          >
+            Show/Hide
+          </button>
+        </div>
+      </div>
+      <div class="config-actions">
+        <a href="/" class="btn-change">Change Configuration</a>
+      </div>
     </div>
     <h1>CLICK TO YOUTRACK</h1>
 

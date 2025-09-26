@@ -27,3 +27,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+// Toggle token visibility
+function toggleTokenVisibility() {
+  const tokenInput = document.getElementById("token-display");
+  const toggleBtn = document.querySelector(".btn-toggle");
+
+  if (tokenInput.type === "password") {
+    tokenInput.type = "text";
+    toggleBtn.textContent = "Hide";
+  } else {
+    tokenInput.type = "password";
+    toggleBtn.textContent = "Show";
+  }
+}

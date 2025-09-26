@@ -1,13 +1,13 @@
 from urllib.parse import parse_qs, urlencode, urlparse
 from dotenv import load_dotenv
-from flask import Flask, Response, request, render_template,redirect,  jsonify
+from flask import Flask, Response, request, render_template,redirect,  jsonify, url_for
 from flask_cors import CORS
 from youtrack_client import YouTrackClient
 import json
 import os
 import requests
 import re
-
+session = {}
 GITHUB_REPO = "https://github.com/strawberrymusicplayer/strawberry/"
 load_dotenv()
 GITHUB_ISSUE = "https://api.github.com/repos/strawberrymusicplayer/strawberry/issues?per_page=100"
@@ -101,8 +101,12 @@ def youtrack_req():
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/connect_to_github', methods=['GET', 'POST'])
-def index():
+@app.route('/github', methods=['GET', 'POST'])
+def github_page():
+    global session
+    youtrack_url =session['youtrack_url']
+    permanent_token = session['permanent_token'] 
+    config_status=  session['youtrack_configured']    
     error = None
     issues = None
     github = ""
@@ -138,32 +142,41 @@ def index():
                     submitted =  True      
     return render_template(
     'github.html',
+    youtrack_url = youtrack_url, 
+    permanent_token = permanent_token,
     github=github,
     issues=issues,
     error=error,
     submitted=submitted
     )
 
-@app.route('/', methods=['GET', 'POST'])
-def setup_youtrack():
-    if request.method == 'POST':
-        youtrack_url = request.form.get('youtrack_url', '').strip()
-        permanent_token = request.form.get('permanent_token', '').strip()
-        
-        # Validate inputs
-        if not youtrack_url or not permanent_token:
-            return render_template('youtrack.html', 
-                                error='Please fill in all fields')
-        
-        if not youtrack_url.startswith('https://'):
-            return render_template('youtrack.html',
-                                error='URL must start with https://')
-        
-        if not permanent_token.startswith('perm:'):
-            return render_template('youtrack.html',
-                                error='Token must start with "perm:"')
-        
+@app.route('/', methods=['GET'])
+def get_youtrack():
     return render_template('youtrack.html')
+@app.route('/', methods=['POST'])
+def input_youtrack():
+    global session
+    youtrack_url = request.form.get('youtrack_url', '').strip()
+    permanent_token = request.form.get('permanent_token', '').strip()
+    # Validate inputs
+    if not youtrack_url or not permanent_token:
+        return render_template('youtrack.html', 
+                            error='Please fill in all fields')
+    
+    if not youtrack_url.startswith('https://'):
+        return render_template('youtrack.html',
+                            error='URL must start with https://')
+    
+    if not permanent_token.startswith('perm'):
+        return render_template('youtrack.html',
+                            error='Token must start with "perm:"')
+        
+    session['youtrack_url'] = youtrack_url
+    session['permanent_token'] = permanent_token
+    session['youtrack_configured'] = True
+    return redirect(url_for('github_page'))
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
