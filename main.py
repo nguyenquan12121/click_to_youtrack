@@ -219,7 +219,7 @@ def get_github_page():
     )
 
 
-@app.route('/github', methods=['POST'])
+@app.route('/github', methods=['GET', 'POST'])
 def github_page():
     youtrack_url = session.get('youtrack_url')
     permanent_token = session.get('permanent_token')
@@ -227,40 +227,51 @@ def github_page():
     issues = None
     github = ""
     submitted = False
-
-    # refresh local GITHUB_TOKEN from env (if changed)
-    GITHUB_TOKEN_LOCAL = os.getenv("GITHUB_TOKEN", GITHUB_TOKEN)
-
-    github = request.form.get('github', '').strip()
-    GITHUB_REPO_REGEX = re.compile(
-        r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
-    )
-    if len(github) < 1:
-        error = "URL cannot be empty."
-        submitted = True
-    elif not GITHUB_REPO_REGEX.match(github):
-        error = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
-        submitted = True
-    else:
-        github_issue_api = build_api_url_from_input(github)
-        headers = {
-            "Accept": "application/vnd.github+json"
-        }
-        # attach token if present
-        if GITHUB_TOKEN_LOCAL:
-            headers["Authorization"] = f"token {GITHUB_TOKEN_LOCAL}"
-
-        response = requests.get(url=github_issue_api, headers=headers)
-        if response.status_code == 200:
-            issues = response.json()
-            cache_file = save_issues_to_file(issues, repo_url=github)
-            session['issues_file'] = cache_file   # only store file path in session
+    
+    # Load mappings
+    mappings = load_mappings()
+    
+    if request.method == 'POST':
+        # refresh local GITHUB_TOKEN from env (if changed)
+        GITHUB_TOKEN_LOCAL = os.getenv("GITHUB_TOKEN", GITHUB_TOKEN)
+        github = request.form.get('github', '').strip()
+        GITHUB_REPO_REGEX = re.compile(
+            r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$"
+        )
+        
+        if len(github) < 1:
+            error = "URL cannot be empty."
+            submitted = True
+        elif not GITHUB_REPO_REGEX.match(github):
+            error = "Invalid GitHub URL. Must be like: https://github.com/user/repo/"
             submitted = True
         else:
-            issues = [] 
-            error = f"Error fetching issues: {response.status_code} - {response.text}"
+            github_issue_api = build_api_url_from_input(github)
+            headers = {
+                "Accept": "application/vnd.github+json"
+            }
+            # attach token if present
+            if GITHUB_TOKEN_LOCAL:
+                headers["Authorization"] = f"token {GITHUB_TOKEN_LOCAL}"
+                
+            response = requests.get(url=github_issue_api, headers=headers)
+            if response.status_code == 200:
+                issues = response.json()
+                cache_file = save_issues_to_file(issues, repo_url=github)
+                session['issues_file'] = cache_file  # only store file path in session
+                submitted = True
+            else:
+                issues = []
+                error = f"Error fetching issues: {response.status_code} - {response.text}"
+                submitted = True
+    else:
+        # GET request - load existing issues from session if available
+        cache_file = session.get('issues_file')
+        if cache_file:
+            issues = load_issues_from_file(cache_file)
             submitted = True
-
+            github = session.get('last_github_url', '')
+    
     return render_template(
         'github.html',
         youtrack_url=youtrack_url,
@@ -268,7 +279,8 @@ def github_page():
         github=github,
         issues=issues,
         error=error,
-        submitted=submitted
+        submitted=submitted,
+        mappings=mappings  # Pass mappings to template
     )
 
 

@@ -94,16 +94,15 @@ input[type="text"]:focus {
   transform: translateY(1px);
 }
 
-/* GitHub Issues Display Styles */
 .issues-container {
-  background-color: #333333; /* JetBrains panel background */
+  background-color: #333333;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 900px;
   padding: 25px;
   margin: 20px auto;
-  border: 1px solid #3c3f41; /* JetBrains border color */
+  border: 1px solid #3c3f41;
 }
 
 .issues-container h2 {
@@ -270,4 +269,51 @@ input[type="text"]:focus {
   .form-example {
     width: 95%;
   }
+}
+
+/* Imported issue styling */
+.issue-item.imported {
+  background-color: #f0fff0; /* Light green background */
+  border-left: 4px solid #28a745; /* Green border */
+  opacity: 0.8;
+}
+
+.issue-item.imported .issue-card {
+  background-color: transparent;
+}
+
+.imported-badge {
+  background-color: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 10px;
+  font-weight: normal;
+}
+
+.btn-imported {
+  background-color: #6c757d !important;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-imported:hover {
+  background-color: #6c757d !important;
+}
+
+/* Disable checkboxes for imported issues */
+.issue-item.imported input[type="checkbox"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Regular issue card styling for contrast */
+.issue-item:not(.imported) {
+  background-color: #333333;
+}
+
+.issue-item:not(.imported) .issue-card {
+  background-color: #333333;
 }

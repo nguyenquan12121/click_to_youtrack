@@ -82,19 +82,28 @@
         </button>
       </div>
       <div class="issues-list">
-        {% for issue in issues %}
-        <div class="issue-item">
+        {% for issue in issues %} {% set is_imported =
+        mappings.get(issue.number|string) %}
+        <div class="issue-item {% if is_imported %}imported{% endif %}">
           <input
             type="checkbox"
             class="check-individual"
             data-issue-id="{{ issue.number }}"
             data-issue-title="{{ issue.title|e }}"
+            {%
+            if
+            is_imported
+            %}disabled{%
+            endif
+            %}
           />
 
           <div class="issue-card">
             <h3 class="issue-title">
               <a href="{{ issue.html_url }}" target="_blank">
-                #{{ issue.number }}: {{ issue.title }}
+                #{{ issue.number }}: {{ issue.title }} {% if is_imported %}
+                <span class="imported-badge">✓ Imported</span>
+                {% endif %}
               </a>
             </h3>
             <div class="issue-meta">
@@ -116,12 +125,16 @@
               </div>
               {% endif %}
             </div>
+            {% if not is_imported %}
             <button
               class="btn-import"
               onclick="importSingleIssue({{ issue.number }}, '{{ issue.title|e }}')"
             >
               Import This Issue
             </button>
+            {% else %}
+            <button class="btn-imported" disabled>Already Imported</button>
+            {% endif %}
           </div>
         </div>
         {% endfor %}
