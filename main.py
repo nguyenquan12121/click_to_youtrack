@@ -121,10 +121,14 @@ def import_one_issue_to_youtrack(youtrack_url, permanent_token, project_name, gi
         'Authorization': f'Bearer {permanent_token}',
         'Content-Type': 'application/json'
     }
+    url = youtrack_url.rstrip("/") + "/api/issues"
+    print(url)
+    print("\n\n\n")
+    print(youtrack_issue)
+    print("\n\n\n")
 
     try:
-        response = requests.post(youtrack_url, headers=headers, json=youtrack_issue)
-
+        response = requests.post(url, headers=headers, json=youtrack_issue)
         if response.status_code in (200, 201):
             return {
                 'success': True,
@@ -278,7 +282,6 @@ def import_single_issue(issue_id):
     cache_file = session.get('issues_file')
     issues = load_issues_from_file(cache_file) if cache_file else []
     github_issue = next((issue for issue in issues if issue.get('number') == issue_id), None)
-
     if github_issue:
         result = import_one_issue_to_youtrack(youtrack_url, permanent_token, "Imported Issues", github_issue)
         return jsonify(result)
