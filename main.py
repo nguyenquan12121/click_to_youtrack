@@ -14,16 +14,11 @@ import time
 
 load_dotenv()
 
-GITHUB_REPO = "https://github.com/strawberrymusicplayer/strawberry/"
-GITHUB_ISSUE = "https://api.github.com/repos/strawberrymusicplayer/strawberry/issues?per_page=100"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
-YOUTRACK_REPO = "https://quan.youtrack.cloud/api/admin/projects?fields=id,name,shortName"
-YOUTRACK_REPO_GET_FIELDS = "https://quan.youtrack.cloud/api/admin/projects?fields=assignee"
 
 # --- Flask app and secret key (required for session) ---
 app = Flask(__name__)
-# Use an env var in production. Fallback to random key for dev only.
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(24)
 
 CORS(app)
@@ -45,6 +40,40 @@ def load_issues_from_file(path):
             return json.load(f)
     except Exception:
         return []
+
+# mapping GH issue number -> YouTrack id
+MAPPINGS_PATH = Path("mappings.json")
+if not MAPPINGS_PATH.exists():
+    MAPPINGS_PATH.write_text(json.dumps({}), encoding="utf-8")
+
+def load_mappings():
+    try:
+        return json.loads(MAPPINGS_PATH.read_text(encoding="utf-8") or "{}")
+    except Exception:
+        return {}
+
+def save_mappings(m):
+    try:
+        MAPPINGS_PATH.write_text(json.dumps(m, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+def add_mapping(github_number: int, youtrack_id: str):
+    m = load_mappings()
+    m[str(github_number)] = youtrack_id
+    save_mappings(m)
+
+def get_mapped_youtrack_id(github_number: int):
+    return load_mappings().get(str(github_number))
+
+def remove_mapping(github_number: int):
+    m = load_mappings()
+    if str(github_number) in m:
+        m.pop(str(github_number))
+        save_mappings(m)
+
+
+# I kept these fields since other fields needs to be added first on youtrack's server to properly work
 def convert_github_to_youtrack(project_name, issue_title, issue_body, issue_state):
     body = {
         "project": {
@@ -105,7 +134,7 @@ def build_api_url_from_input(raw_url: str) -> str:
             if len(parts) > idx + 2:
                 owner = parts[idx + 1]
                 repo = parts[idx + 2]
-                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=2"
+                return f"https://api.github.com/repos/{owner}/{repo}/issues?per_page=5"
     return ""
 
 
@@ -122,14 +151,22 @@ def import_one_issue_to_youtrack(youtrack_url, permanent_token, project_name, gi
         'Content-Type': 'application/json'
     }
     url = youtrack_url.rstrip("/") + "/api/issues"
-    print(url)
-    print("\n\n\n")
-    print(youtrack_issue)
-    print("\n\n\n")
-
     try:
         response = requests.post(url, headers=headers, json=youtrack_issue)
         if response.status_code in (200, 201):
+            yt_id = None
+            try:
+                yt_id = response.json().get('id')
+            except Exception:
+                pass
+
+            # save mapping (if we got an id)
+            gh_number = github_issue.get('number')
+            if gh_number and yt_id:
+                try:
+                    add_mapping(gh_number, yt_id)
+                except Exception:
+                    app.logger.exception("Failed to add mapping for GH %s -> YT %s", gh_number, yt_id)            
             return {
                 'success': True,
                 'issue_id': github_issue.get('number'),
@@ -161,21 +198,6 @@ def import_bulk_issues_to_youtrack(youtrack_url, permanent_token, project_name, 
         time.sleep(0.5)
     return results
 
-
-def youtrack_req():
-    global YOUTRACK_TOKEN, YOUTRACK_REPO_GET_FIELDS
-    req = {
-        "url": YOUTRACK_REPO_GET_FIELDS,
-        "headers": {
-            "Authorization": f'Bearer {YOUTRACK_TOKEN}',
-            "Cache-Control": "no-cache",
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
-    }
-    response = requests.get(url=req["url"], headers=req["headers"])
-    response.raise_for_status()
-    return response.json()
 
 
 @app.route('/github', methods=['GET'])
