@@ -44,6 +44,26 @@
       </div>
     </div>
 
+    <!-- Sync Control Panel -->
+    <div class="sync-panel">
+      <h2>Synchronization Control</h2>
+      <div class="sync-actions">
+        <button type="button" id="sync-all-issues" class="btn-sync-all">
+          Sync All Mapped Issues
+        </button>
+        <button type="button" id="check-sync-status" class="btn-sync-status">
+          Check Sync Status
+        </button>
+        <div class="sync-progress" id="sync-progress" style="display: none">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-text" id="progress-text">Syncing...</span>
+        </div>
+      </div>
+      <div id="sync-results" class="sync-results"></div>
+    </div>
+
     <form action="/github" method="post" class="form-example">
       <div class="form-example">
         <label for="github">Github Repository</label>
@@ -76,15 +96,19 @@
           type="button"
           id="import-selected"
           class="btn-import-bulk"
-          enable
+          enabled
         >
           Import Selected (<span id="import-count">0</span>)
         </button>
       </div>
+
       <div class="issues-list">
         {% for issue in issues %} {% set is_imported =
         mappings.get(issue.number|string) %}
-        <div class="issue-item {% if is_imported %}imported{% endif %}">
+        <div
+          class="issue-item {% if is_imported %}imported{% endif %}"
+          data-issue-id="{{ issue.number }}"
+        >
           <input
             type="checkbox"
             class="check-individual"
@@ -93,7 +117,7 @@
             {%
             if
             is_imported
-            %}enable{%
+            %}enabled{%
             endif
             %}
           />
@@ -106,6 +130,7 @@
                 {% endif %}
               </a>
             </h3>
+
             <div class="issue-meta">
               <span class="issue-state {{ issue.state }}"
                 >{{ issue.state }}</span
@@ -125,27 +150,42 @@
               </div>
               {% endif %}
             </div>
-            {% if not is_imported %}
-            <button
-              class="btn-import"
-              onclick="importSingleIssue({{ issue.number }}, '{{ issue.title|e }}')"
-            >
-              Import This Issue
-            </button>
-            {% else %}
-            <button class="btn-imported" disabled>Already Imported</button>
-            {% endif %}
+
+            <div class="sync-status" id="sync-status-{{ issue.number }}">
+              <!-- Sync status will be displayed here -->
+            </div>
+
+            <div class="issue-actions">
+              {% if not is_imported %}
+              <button
+                class="btn-import"
+                onclick="importSingleIssue({{ issue.number }}, '{{ issue.title|e }}')"
+              >
+                Import This Issue
+              </button>
+              {% else %}
+              <button class="btn-imported" disabled>Already Imported</button>
+              <button
+                class="btn-sync-single"
+                onclick="syncSingleIssue({{ issue.number }}, '{{ issue.title|e }}')"
+              >
+                Sync Now
+              </button>
+              {% endif %}
+            </div>
           </div>
         </div>
         {% endfor %}
       </div>
     </div>
+
     {% elif not error and submitted and issues is defined and issues|length == 0
     %}
     <div class="no-issues">
       <p>No issues found in this repository.</p>
     </div>
     {% endif %}
+
+    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
   </body>
-  <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
 </html>
